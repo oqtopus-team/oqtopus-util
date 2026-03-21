@@ -40,11 +40,17 @@ python-project-template/
 
 ## Installing Dependencies
 
-Install the project dependencies:
+Install the project dependencies and set up the local development environment:
 
 ```shell
 make install
 ```
+
+This command performs the following:
+
+- Installs all dependencies via `uv`.
+- Registers pre-commit hooks to automate code quality checks.
+- Configures the Git commit message template.
 
 ## Linting and Testing
 

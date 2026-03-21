@@ -1,6 +1,6 @@
 [project]
 name = "python-project-template"
-version = "1.0.0"
+version = "1.0.1"
 description = "Template repository for building Python projects in the OQTOPUS ecosystem"
 readme = "README.md"
 license = "Apache-2.0"
@@ -30,6 +30,7 @@ repository = "https://github.com/oqtopus-team/python-project-template"
 [dependency-groups]
 dev = [
   "mypy>=1.19.1",
+  "pre-commit>=4.5.1",
   "ruff>=0.15.4",
   "types-pyyaml>=6.0.12.20250915",
 ]

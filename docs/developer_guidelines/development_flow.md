@@ -83,6 +83,17 @@ While there are no strict rules, the following naming conventions are recommende
 - `bugfix/xxx`: (xxx represents the bug being fixed)
 - `hotfix/xxx`: (xxx represents the urgent fix)
 
+## Automated Checks (pre-commit)
+
+This project uses [`uv-pre-commit`](https://docs.astral.sh/uv/guides/integration/pre-commit/) to ensure code quality and consistency.
+When you run `git commit`, the following checks are automatically executed:
+
+- uv-lock: Ensures `pyproject.toml` and `uv.lock` are in sync (prevents version mismatch).
+- Ruff: Automatically lints and formats your code.
+- Mypy: Performs static type checking.
+
+If any check fails, the commit will be aborted. You must fix the issues (e.g., run `uv lock` to sync the lockfile or fix linting errors) and run `git commit` again.
+
 ## Conventional Commits
 
 Commit messages should follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.

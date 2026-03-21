@@ -4,9 +4,10 @@ SHELL := bash
 
 .PHONY: install run format lint test verify docs-lint docs-build docs-serve help
 
-install: ## Install dependencies and configure git commit template
+install: ## Install dependencies and configure git hooks and commit template
 	@uv sync --all-groups
 	@if [ -d .git ]; then \
+		uv run pre-commit install; \
 		git config --local commit.template .gitmessage; \
 	fi
 
@@ -18,6 +19,7 @@ format: ## Run code formatting
 	@uv run ruff format
 
 lint: ## Run linting
+	@uv lock --check
 	@uv run ruff check
 	@uv run ruff format --check
 	@uv run mypy
