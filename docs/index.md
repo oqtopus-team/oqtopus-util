@@ -1,27 +1,17 @@
 <!-- markdownlint-disable MD041 -->
 ![OQTOPUS logo](./asset/oqtopus-logo.png)
 
-# python-project-template
+# OQTOPUS Util
 
-!!! warning "Template Note"
-    This note is included for the project template.
-    Remove this note before publishing the documentation.
-
-    This page is provided as a sample for the project template.  
-    The badge and citation links currently point to those of Tranqu.
-
-[![CI](https://github.com/oqtopus-team/tranqu/actions/workflows/ci.yaml/badge.svg)](https://github.com/oqtopus-team/tranqu/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/oqtopus-team/tranqu/graph/badge.svg?token=RCXTMMXOMV)](https://codecov.io/gh/oqtopus-team/tranqu)
-[![pypi version](https://img.shields.io/pypi/v/tranqu.svg)](https://pypi.org/project/tranqu/)
+[![CI](https://github.com/oqtopus-team/oqtopus-util/actions/workflows/ci.yaml/badge.svg)](https://github.com/oqtopus-team/oqtopus-util/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/oqtopus-team/oqtopus-util/graph/badge.svg?token=RCXTMMXOMV)](https://codecov.io/gh/oqtopus-team/oqtopus-util)
+[![pypi version](https://img.shields.io/pypi/v/oqtopus-util.svg)](https://pypi.org/project/oqtopus-util/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![slack](https://img.shields.io/badge/slack-OQTOPUS-pink.svg?logo=slack&style=plastic")](https://join.slack.com/t/oqtopus/shared_invite/zt-3bpjb7yc3-Vg8IYSMY1m5wV3DR~TMSnw)
+[![slack](https://img.shields.io/badge/slack-OQTOPUS-pink.svg?logo=slack&style=plastic)](https://oqtopus.slack.com/archives/C08KB2M66SD)
 
 ## Overview
 
-**python-project-template** is a template repository for building Python projects in OQTOPUS ecosystem.
-
-It provides a project template that helps developers quickly start Python
-projects related to OQTOPUS while following the project's conventions.
+**OQTOPUS Util** is a template repository for building Python projects in the OQTOPUS ecosystem.
 
 ## Features
 
@@ -45,11 +35,11 @@ projects related to OQTOPUS while following the project's conventions.
 
 ## Citation
 
-You can use the DOI to cite Tranqu in your research.
+You can use the DOI to cite OQTOPUS Util in your research.
 
 [![DOI](https://zenodo.org/badge/898082553.svg)](https://zenodo.org/badge/latestdoi/898082553)
 
-Citation information is also available in the [CITATION](https://github.com/oqtopus-team/tranqu/blob/main/CITATION.cff) file.
+Citation information is also available in the [CITATION](https://github.com/oqtopus-team/oqtopus-util/blob/main/CITATION.cff) file.
 
 ## Contact
 
@@ -59,7 +49,7 @@ You can contact us by creating an issue in this repository or by email:
 
 ## License
 
-python-project-template is released under the [Apache License 2.0](https://github.com/oqtopus-team/python-project-template/blob/main/LICENSE).
+OQTOPUS Util is released under the [Apache License 2.0](LICENSE).
 
 ## Supporting
 

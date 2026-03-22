@@ -3,51 +3,6 @@
 
 ## Branch Strategy
 
-!!! warning "Template Note"
-    This note is included for the project template.
-    Remove this note before publishing the documentation.
-
-    Decide whether your project should use a `develop` branch.
-    This depends on the project size and development workflow.
-
-    Two branch strategy diagrams are provided below:
-
-    - one using a `develop` branch
-    - one without a `develop` branch
-
-    Keep the diagram that fits your project and remove the other one.
-
-As shown in the diagram below, the `develop` branch is created from the `main` branch, and feature branches (`feature/xxx`) are created from the `develop` branch for development. The `main` branch is the release branch, while the `develop` branch is for development.
-
-```mermaid
-gitGraph LR:
-  commit tag:"release-v1.0.0"
-  branch develop
-  commit
-  branch feature/xxx
-  commit
-  commit
-  checkout develop
-  branch feature/yyy
-  commit
-  checkout develop
-  merge feature/yyy
-  checkout feature/xxx
-  commit
-  checkout develop
-  merge feature/xxx
-  checkout main
-  merge develop tag:"release-v1.1.0"
-  checkout develop
-  branch hotfix/zzz
-  commit
-  commit
-  checkout develop
-  merge hotfix/zzz
-  checkout main
-  merge develop tag:"release-v1.2.0"
-```
-
 As shown in the diagram below, the feature branches (`feature/xxx`) are created from the `main` branch for development. The `main` branch is the release branch.
 
 ```mermaid
