@@ -8,7 +8,7 @@ class CircularDependencyError(ValueError):
 
 
 class DiContainer:
-    """A lightweight Dependency Injection (DI) container used in OQTOPUS Engine.
+    """A lightweight configuration-based Dependency Injection (DI) container.
 
     The container receives a fully-parsed configuration dictionary
     (after environment-variable substitution via load_config()) and
