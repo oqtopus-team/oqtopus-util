@@ -7,6 +7,8 @@ nav:
   - Home: index.md
   - Usage:
       - Getting started: usage/getting_started.md
+      - Config Util: usage/config_util.md
+      - DI Container: usage/di_container.md
   - API reference:
       - python-project-template: reference/
   - Developer Guidelines:

@@ -20,6 +20,8 @@
 ## Usage
 
 - [Getting Started](./usage/getting_started.md)
+- [Config Util](./usage/config_util.md)
+- [DI Container](./usage/di_container.md)
 
 ## API reference
 
