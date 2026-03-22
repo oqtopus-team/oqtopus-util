@@ -1,7 +1,7 @@
 [project]
 name = "oqtopus-util"
 version = "1.0.0"
-description = "Template repository for building Python projects in the OQTOPUS ecosystem"
+description = "Collection of common utilities and shared functionalities for various applications within the OQTOPUS ecosystem"
 readme = "README.md"
 license = "Apache-2.0"
 authors = [{ name = "oqtopus-team", email = "oqtopus-team@googlegroups.com" }]

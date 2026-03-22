@@ -35,7 +35,7 @@
 
 You can use the DOI to cite OQTOPUS Util in your research.
 
-[![DOI](https://zenodo.org/badge/xxx.svg)](https://zenodo.org/badge/latestdoi/xxx)
+[![DOI](https://zenodo.org/badge/1184620124.svg)](https://zenodo.org/badge/latestdoi/1184620124)
 
 Citation information is also available in the [CITATION](https://github.com/oqtopus-team/oqtopus-util/blob/main/CITATION.cff) file.
 
