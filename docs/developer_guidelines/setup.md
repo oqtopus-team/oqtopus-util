@@ -10,14 +10,14 @@ Install the following tools before starting development.
 
 | Tool                                        | Version | Description                        |
 | ------------------------------------------- | ------- | ---------------------------------- |
-| [Python](https://www.python.org/downloads/) | >=3.14  | Python programming language        |
+| [Python](https://www.python.org/downloads/) | >=3.11  | Python programming language        |
 | [uv](https://docs.astral.sh/uv/)            | >=0.10  | Python package and project manager |
 
 Clone the repository:
 
 ```shell
-git clone https://github.com/oqtopus-team/python-project-template.git
-cd python-project-template
+git clone https://github.com/oqtopus-team/oqtopus-util.git
+cd oqtopus-util
 ```
 
 ## Project Structure
@@ -25,11 +25,10 @@ cd python-project-template
 The repository is organized as follows:
 
 ```text
-python-project-template/
+oqtopus-util/
 ├─ src/           # Python package source code
 ├─ tests/         # Test suite
 ├─ docs/          # Documentation sources (MkDocs)
-├─ config/        # Example configuration files (optional)
 ├─ .github/       # GitHub workflows and repository settings
 ├─ pyproject.toml # Project configuration and dependencies
 ├─ Makefile       # Development commands

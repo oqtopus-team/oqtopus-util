@@ -11,7 +11,7 @@
 
 ## Overview
 
-**OQTOPUS Util** is a template repository for building Python projects in the OQTOPUS ecosystem.
+**OQTOPUS Util** is a collection of common utilities and shared functionalities for various applications within the OQTOPUS ecosystem.
 
 ## Features
 
@@ -39,7 +39,7 @@
 
 You can use the DOI to cite OQTOPUS Util in your research.
 
-[![DOI](https://zenodo.org/badge/898082553.svg)](https://zenodo.org/badge/latestdoi/898082553)
+[![DOI](https://zenodo.org/badge/xxx.svg)](https://zenodo.org/badge/latestdoi/xxx)
 
 Citation information is also available in the [CITATION](https://github.com/oqtopus-team/oqtopus-util/blob/main/CITATION.cff) file.
 
