@@ -13,10 +13,6 @@
 
 **OQTOPUS Util** is a collection of common utilities and shared functionalities for various applications within the OQTOPUS ecosystem.
 
-## Features
-
-- **Hello, World application**: A Hello World application is included as an example.
-
 ## Documentation
 
 - [Documentation Home](https://oqtopus-util.readthedocs.io/)

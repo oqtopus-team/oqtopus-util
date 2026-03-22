@@ -4,12 +4,6 @@
 with environment-variable substitution, masking sensitive values, and applying logging
 configuration.
 
-## Installation
-
-```shell
-pip install oqtopus-util
-```
-
 ## Functions
 
 ### load_config

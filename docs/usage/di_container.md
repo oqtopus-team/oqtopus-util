@@ -1,18 +1,14 @@
 # DI Container
 
-`oqtopus_util.di` provides a lightweight Dependency Injection (DI) container that
-instantiates and manages Python objects from a YAML-based configuration dictionary.
-
-## Installation
-
-```shell
-pip install oqtopus-util
-```
+`oqtopus_util.di` provides a lightweight, configuration-based Dependency Injection (DI) container. It allows you to swap object implementations without modifying your source code by instantiating and managing Python objects directly from a YAML-based configuration.
 
 ## Overview
 
 The `DiContainer` class reads a registry configuration (a plain Python `dict`, typically
 produced by [`load_config`](./config_util.md)) and creates objects on demand.
+
+By simply changing the configuration file, you can switch between different implementations (e.g., switching from a simulator to a real quantum device) without touching the application logic.
+
 Each top-level key in the registry identifies a **component**.
 The component configuration must contain a `_target_` key with the fully-qualified
 class path.
@@ -31,14 +27,15 @@ resolved recursively before being passed to the constructor.
 ### 1. Define a registry in YAML
 
 ```yaml
-job_fetcher:
-  _target_: myapp.fetchers.JobFetcher
-  _scope_: singleton
-  repo: "@job_repo"
+registry:
+  job_fetcher:
+    _target_: myapp.fetchers.JobFetcher
+    _scope_: singleton
+    repo: "@job_repo"
 
-job_repo:
-  _target_: myapp.repositories.JobRepository
-  base_url: "http://localhost:8888"
+  job_repo:
+    _target_: myapp.repositories.JobRepository
+    base_url: "http://localhost:8888"
 ```
 
 ### 2. Load the registry and create the container
@@ -77,9 +74,10 @@ assert a is b  # True — same instance
 A new instance is created on every call to `get()`.
 
 ```yaml
-job_fetcher:
-  _target_: myapp.fetchers.JobFetcher
-  _scope_: prototype
+registry:
+  job_fetcher:
+    _target_: myapp.fetchers.JobFetcher
+    _scope_: prototype
 ```
 
 ```python
@@ -94,22 +92,18 @@ A string value that starts with `@` refers to another component in the registry.
 References are resolved recursively, so chains of dependencies are supported.
 
 ```yaml
-service:
-  _target_: myapp.Service
-  repo: "@repository"
-  logger: "@app_logger"
+registry:
+  service:
+    _target_: myapp.Service
+    repo: "@repository"
 
-repository:
-  _target_: myapp.Repository
-  db: "@database"
+  repository:
+    _target_: myapp.Repository
+    db: "@database"
 
-database:
-  _target_: myapp.Database
-  url: "postgresql://localhost/mydb"
-
-app_logger:
-  _target_: myapp.AppLogger
-  level: INFO
+  database:
+    _target_: myapp.Database
+    url: "postgresql://localhost/mydb"
 ```
 
 ```python
@@ -163,7 +157,7 @@ myapp/
   __init__.py
   service.py
 config/
-  registry.yaml
+  di.yaml
 main.py
 ```
 
@@ -182,16 +176,17 @@ class Service:
         return f"connected to {self.repo.base_url}"
 ```
 
-### config/registry.yaml
+### config/di.yaml
 
 ```yaml
-service:
-  _target_: myapp.service.Service
-  repo: "@repository"
+registry:
+  service:
+    _target_: myapp.service.Service
+    repo: "@repository"
 
-repository:
-  _target_: myapp.service.Repository
-  base_url: "http://localhost:8888"
+  repository:
+    _target_: myapp.service.Repository
+    base_url: "http://localhost:8888"
 ```
 
 ### main.py
@@ -200,9 +195,9 @@ repository:
 from oqtopus_util.config import load_config
 from oqtopus_util.di import DiContainer
 
-registry = load_config("config/registry.yaml")
-container = DiContainer(registry)
+config = load_config("config/di.yaml")
+dicon = DiContainer(**config)
 
-service = container.get("service")
+service = dicon.get("service")
 print(service.run())  # "connected to http://localhost:8888"
 ```

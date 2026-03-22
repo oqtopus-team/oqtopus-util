@@ -38,6 +38,7 @@ class DiContainer:
 
         dicon = DiContainer(registry_config)
         job_fetcher = dicon.get("job_fetcher")
+
     """
 
     def __init__(self, registry: dict[str, Any]) -> None:

@@ -13,10 +13,6 @@
 
 **OQTOPUS Util** is a collection of common utilities and shared functionalities for various applications within the OQTOPUS ecosystem.
 
-## Features
-
-- **Hello, World application**: A Hello World application is included as an example.
-
 ## Usage
 
 - [Getting Started](./usage/getting_started.md)
@@ -51,7 +47,7 @@ You can contact us by creating an issue in this repository or by email:
 
 ## License
 
-OQTOPUS Util is released under the [Apache License 2.0](LICENSE).
+OQTOPUS Util is released under the [Apache License 2.0](https://github.com/oqtopus-team/oqtopus-util/blob/main/LICENSE).
 
 ## Supporting
 
