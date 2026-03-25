@@ -23,11 +23,10 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "**/uv.lock"
+          cache-python: true
 
       - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version-file: ".python-version"
+        run: uv python install
 
       - name: Build
         run: uv build
