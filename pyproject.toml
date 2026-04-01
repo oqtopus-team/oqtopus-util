@@ -60,6 +60,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/oqtopus_util"]
 
+[tool.uv]
+exclude-newer = "1 week"
+
 [tool.ruff]
 preview = true
 include = [
