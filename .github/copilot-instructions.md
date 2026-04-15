@@ -11,21 +11,12 @@
 
 ```
 src/oqtopus_util/          # Library source (installed package)
-  __init__.py
-  py.typed                 # PEP 561 marker
-  config/
-    __init__.py
-    config_util.py         # load_config, mask_sensitive_info, setup_logging
-  di/
-    __init__.py
-    di_container.py        # DiContainer, CircularDependencyError
-    class_loader.py        # load_class helper
+  config/                  # load_config, mask_sensitive_info, setup_logging
+  di/                      # DiContainer, CircularDependencyError, load_class
 
 tests/oqtopus_util/        # Mirror of src layout
   config/
-    test_config_util.py
   di/
-    test_di_container.py
 
 docs/                      # MkDocs documentation source
 docs_scripts/              # Helper scripts for doc generation
@@ -107,3 +98,10 @@ uv run mypy src tests           # Type-check
 - **mypy strict mode**: ruff `ANN` rules enforce annotations on all public functions in `src/`; omitting them will cause both ruff and mypy to fail.
 - **`exclude-newer = "1 week"`** in `[tool.uv]`: uv pins dependency resolution to packages published within the last week. If a fresh `uv sync` fails to find a package, this setting may be the cause — check `pyproject.toml` and adjust if needed during dependency updates.
 - **`actions/checkout@v6`** is used in CI; this is a non-standard version tag (upstream latest is v4). Do not downgrade it without understanding the repository's pinning intent.
+
+## Commit and PR conventions
+
+- Use Conventional Commits style for all commit messages.
+- Follow the commit message instructions in `.github/instructions/commit-message.instructions.md`.
+- Follow the Pull Request title and description instructions in `.github/instructions/pull-request-description.instructions.md`.
+- When creating a Pull Request, follow the sections defined in `.github/pull_request_template.md`.
