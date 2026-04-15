@@ -29,6 +29,7 @@ oqtopus-util/
 ├─ src/           # Python package source code
 ├─ tests/         # Test suite
 ├─ docs/          # Documentation sources (MkDocs)
+├─ .vscode/       # VSCode settings
 ├─ .github/       # GitHub workflows and repository settings
 ├─ pyproject.toml # Project configuration and dependencies
 ├─ Makefile       # Development commands
