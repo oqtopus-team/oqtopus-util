@@ -7,7 +7,6 @@ SHELL := bash
 install: ## Install dependencies and configure git hooks and commit template
 	@uv sync --all-groups
 	@if [ -d .git ]; then \
-		uv run pre-commit install; \
 		git config --local commit.template .gitmessage; \
 	fi
 
