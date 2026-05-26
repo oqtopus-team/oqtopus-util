@@ -63,6 +63,7 @@ safe_cfg = mask_sensitive_info(config)
 `mask_sensitive_info(config)` returns a copy of the configuration dictionary where
 the values of the following keys are replaced with `"***MASKED***"`:
 
+- `api_key`
 - `api_token`
 - `password`
 - `secret_key`

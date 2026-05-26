@@ -6,7 +6,7 @@ from typing import Any
 
 import yaml
 
-SENSITIVE_KEYS = {"api_token", "password", "secret_key"}
+SENSITIVE_KEYS = {"api_key", "api_token", "password", "secret_key"}
 
 # Pattern matching ${VAR} and ${VAR, default}
 _PATTERN = re.compile(r"\$\{([A-Z0-9_]+)(?:,\s*([^}]+))?\}")
@@ -16,7 +16,7 @@ def mask_sensitive_info(config: dict[str, Any]) -> dict[str, Any]:
     """Mask sensitive information in the given DictConfig.
 
     This function replaces the values of predefined sensitive keys
-    (e.g., "api_token", "password", "secret_key") with a masked string.
+    (e.g., "api_key", "api_token", "password", "secret_key") with a masked string.
     It processes nested DictConfig recursively.
 
     Args:
