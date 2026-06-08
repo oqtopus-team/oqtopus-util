@@ -1,6 +1,6 @@
 [project]
 name = "oqtopus-util"
-version = "1.0.1"
+version = "1.0.2"
 description = "Collection of common utilities and shared functionalities for various applications within the OQTOPUS ecosystem"
 readme = "README.md"
 license = "Apache-2.0"
@@ -22,6 +22,7 @@ classifiers = [
 ]
 requires-python = ">=3.11,<4.0"
 dependencies = [
+  "grpcio>=1.68.1",
   "pyyaml>=6.0.3",
 ]
 
@@ -61,7 +62,7 @@ build-backend = "hatchling.build"
 packages = ["src/oqtopus_util"]
 
 [tool.uv]
-exclude-newer = "1 week"
+exclude-newer = "2026-06-08T00:00:00Z"
 
 [tool.ruff]
 preview = true
