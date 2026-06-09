@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import grpc  # type: ignore[import-untyped]
 
-GrpcOption = tuple[str, object] | list[object]
+GrpcOption = tuple[str, object]
 GrpcOptions = Sequence[GrpcOption]
 
 
