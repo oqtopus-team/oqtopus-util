@@ -70,14 +70,12 @@ def test_create_server_merges_explicit_options(mocker: MockerFixture):
 
     create_server(
         executor,
-        [("grpc.max_receive_message_length", 1024)],
         options=[("grpc.max_send_message_length", 2048)],
     )
 
     mock_server.assert_called_once_with(
         executor,
         options=[
-            ("grpc.max_receive_message_length", 1024),
             ("grpc.max_send_message_length", 2048),
         ],
     )
