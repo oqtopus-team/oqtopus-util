@@ -12,9 +12,7 @@ SENSITIVE_KEYS = {"api_key", "api_token", "password", "secret_key"}
 # Group 1: variable name
 # Group 2: quoted default ("..." or '...', quotes preserved for YAML to handle)
 # Group 3: unquoted default (} not allowed, backward-compatible)
-_PATTERN = re.compile(
-    r"""\$\{([A-Z0-9_]+)(?:,\s*(?:("[^"]*"|'[^']*')|([^}]+?)))?\}"""
-)
+_PATTERN = re.compile(r"""\$\{([A-Z0-9_]+)(?:,\s*(?:("[^"]*"|'[^']*')|([^}]+?)))?\}""")
 
 
 def mask_sensitive_info(config: dict[str, Any]) -> dict[str, Any]:
@@ -95,9 +93,6 @@ def _replace_env(match: re.Match) -> str:
 
     # No env variable, but a default value was provided
     if default_raw is not None:
-        # If the default part was ${VAR, ""}, default_raw might be empty
-        if not default_raw:
-            return '""'
         return default_raw
 
     # No env and no default provided

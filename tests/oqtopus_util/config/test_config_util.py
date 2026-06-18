@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from oqtopus_util.config import load_config
+from oqtopus_util.config import load_config, mask_sensitive_info, setup_logging
 
 # ---------------------------------------------------------------------------
 # Helper
@@ -228,9 +228,9 @@ def test_unquoted_default_is_unchanged(temp_config_file: Path):
 
     cfg = load_config(str(temp_config_file))
 
-    assert cfg["timeout"] == 30      # YAML int
-    assert cfg["debug"] is False     # YAML bool
-    assert cfg["label"] == "hello"   # YAML string
+    assert cfg["timeout"] == 30  # YAML int
+    assert cfg["debug"] is False  # YAML bool
+    assert cfg["label"] == "hello"  # YAML string
 
 
 def test_double_quoted_default_with_brace_inside(temp_config_file: Path):
@@ -302,7 +302,7 @@ def test_quoted_default_preserves_string_type(temp_config_file: Path):
     cfg = load_config(str(temp_config_file))
 
     assert cfg["flag"] == "true"  # str, not bool True
-    assert cfg["count"] == "10"   # str, not int 10
+    assert cfg["count"] == "10"  # str, not int 10
 
 
 def test_tilde_paths_are_expanded_to_absolute_paths(temp_config_file: Path):
@@ -327,3 +327,61 @@ def test_tilde_paths_are_expanded_to_absolute_paths(temp_config_file: Path):
     assert cfg["nested"][0] == str(home / ".config" / "oqtopus")
     assert cfg["nested"][1] == "/tmp/fixed"  # noqa: S108
     assert cfg["label"] == "release~candidate"
+
+
+# ---------------------------------------------------------------------------
+# mask_sensitive_info
+# ---------------------------------------------------------------------------
+
+
+def test_mask_sensitive_info_masks_all_sensitive_keys():
+    """All four built-in sensitive keys should be replaced with ***MASKED***."""
+    config = {
+        "api_key": "key123",
+        "api_token": "tok456",
+        "password": "hunter2",
+        "secret_key": "s3cr3t",
+    }
+    result = mask_sensitive_info(config)
+    assert all(v == "***MASKED***" for v in result.values())
+
+
+def test_mask_sensitive_info_passes_through_non_sensitive():
+    """Non-sensitive keys should be returned unchanged."""
+    config = {"host": "localhost", "port": 5432, "debug": True}
+    result = mask_sensitive_info(config)
+    assert result == config
+
+
+def test_mask_sensitive_info_recurses_into_nested_dict():
+    """Nested dicts should be processed recursively."""
+    config = {
+        "database": {
+            "host": "db.example.com",
+            "password": "secret",
+        },
+        "api_key": "toplevel",
+    }
+    result = mask_sensitive_info(config)
+    assert result["database"]["host"] == "db.example.com"
+    assert result["database"]["password"] == "***MASKED***"  # noqa: S105
+    assert result["api_key"] == "***MASKED***"
+
+
+# ---------------------------------------------------------------------------
+# setup_logging
+# ---------------------------------------------------------------------------
+
+
+def test_setup_logging_applies_valid_config():
+    """A minimal valid logging config dict should be applied without error."""
+    cfg = {"version": 1, "disable_existing_loggers": False}
+    setup_logging(cfg)  # should not raise
+
+
+def test_setup_logging_raises_type_error_for_non_dict():
+    """Passing a non-dict should raise TypeError with a descriptive message."""
+    with pytest.raises(
+        TypeError, match="Logging configuration must be convertible to a dict"
+    ):
+        setup_logging("not-a-dict")
