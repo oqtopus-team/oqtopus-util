@@ -8,8 +8,13 @@ import yaml
 
 SENSITIVE_KEYS = {"api_key", "api_token", "password", "secret_key"}
 
-# Pattern matching ${VAR} and ${VAR, default}
-_PATTERN = re.compile(r"\$\{([A-Z0-9_]+)(?:,\s*([^}]+))?\}")
+# Pattern matching ${VAR}, ${VAR, default}, ${VAR, "default"}, ${VAR, 'default'}
+# Group 1: variable name
+# Group 2: quoted default ("..." or '...', quotes preserved for YAML to handle)
+# Group 3: unquoted default (} not allowed, backward-compatible)
+_PATTERN = re.compile(
+    r"""\$\{([A-Z0-9_]+)(?:,\s*(?:("[^"]*"|'[^']*')|([^}]+?)))?\}"""
+)
 
 
 def mask_sensitive_info(config: dict[str, Any]) -> dict[str, Any]:
@@ -64,8 +69,10 @@ def _replace_env(match: re.Match) -> str:
 
     Rules:
       - If the environment variable VAR exists → substitute its value (raw string)
-      - If default is provided → substitute it directly (YAML will type-cast it)
-      - If no default is provided → substitute empty string ""
+      - If a quoted default is provided ("..." or '...') → substitute with quotes
+        preserved so that YAML handles quoting and type semantics
+      - If an unquoted default is provided → substitute it directly (YAML type-casts it)
+      - If no default is provided → substitute null
 
     Args:
         match: The regex match object containing the variable name and optional default.
@@ -75,7 +82,7 @@ def _replace_env(match: re.Match) -> str:
 
     """
     var_name = match.group(1)
-    default_raw = match.group(2)
+    default_raw = match.group(2) if match.group(2) is not None else match.group(3)
 
     # Environment variable exists
     if var_name in os.environ:
@@ -131,9 +138,12 @@ def load_config(config_path: str) -> dict[str, Any]:
     """Load a YAML configuration file.
 
     Supported syntax:
-        ${VAR}              → If VAR not set, becomes "" (empty string)
-        ${VAR, default}     → If VAR not set, "default" is inserted literally,
-                              and then YAML type-casts it.
+        ${VAR}                   → If VAR not set, becomes null
+        ${VAR, default}          → If VAR not set, "default" is inserted literally
+                                   and then YAML type-casts it.
+        ${VAR, "default"}        → Quotes are preserved; YAML treats the value as a
+        ${VAR, 'default'}          string, suppressing automatic type casting.
+                                   } inside the quoted value is allowed.
 
     Behavior:
       1. Read the entire YAML file as a raw string.

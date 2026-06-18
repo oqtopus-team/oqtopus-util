@@ -210,6 +210,101 @@ def test_config_with_env_variations(temp_config_file: Path):
     assert cfg["default_whitespace"] is None
 
 
+def test_unquoted_default_is_unchanged(temp_config_file: Path):
+    """
+    Unquoted defaults still behave as before (backward compatibility).
+    """
+    write_config(
+        temp_config_file,
+        """
+        timeout: ${TIMEOUT, 30}
+        debug: ${DEBUG, false}
+        label: ${LABEL, hello}
+        """,
+    )
+    os.environ.pop("TIMEOUT", None)
+    os.environ.pop("DEBUG", None)
+    os.environ.pop("LABEL", None)
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["timeout"] == 30      # YAML int
+    assert cfg["debug"] is False     # YAML bool
+    assert cfg["label"] == "hello"   # YAML string
+
+
+def test_double_quoted_default_with_brace_inside(temp_config_file: Path):
+    """
+    Double-quoted default containing } is expanded correctly.
+    """
+    write_config(
+        temp_config_file,
+        """
+        config_dir: ${CONFIG_DIR, "/app/config/{chip_id}/config"}
+        """,
+    )
+    os.environ.pop("CONFIG_DIR", None)
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["config_dir"] == "/app/config/{chip_id}/config"
+
+
+def test_single_quoted_default_with_brace_inside(temp_config_file: Path):
+    """
+    Single-quoted default containing } is expanded correctly.
+    """
+    write_config(
+        temp_config_file,
+        """
+        config_dir: ${CONFIG_DIR, '/app/config/{chip_id}/config'}
+        """,
+    )
+    os.environ.pop("CONFIG_DIR", None)
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["config_dir"] == "/app/config/{chip_id}/config"
+
+
+def test_env_overrides_quoted_default(temp_config_file: Path):
+    """
+    When the environment variable is set, the quoted default is ignored.
+    """
+    write_config(
+        temp_config_file,
+        """
+        config_dir: ${CONFIG_DIR, "/app/config/{chip_id}/config"}
+        """,
+    )
+    os.environ["CONFIG_DIR"] = "/real/path"
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["config_dir"] == "/real/path"
+
+
+def test_quoted_default_preserves_string_type(temp_config_file: Path):
+    """
+    Quoted defaults are passed to YAML with quotes intact, so YAML treats them
+    as strings even when the content looks like an int or bool.
+    """
+    write_config(
+        temp_config_file,
+        """
+        flag: ${FLAG, "true"}
+        count: ${COUNT, '10'}
+        """,
+    )
+    os.environ.pop("FLAG", None)
+    os.environ.pop("COUNT", None)
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["flag"] == "true"  # str, not bool True
+    assert cfg["count"] == "10"   # str, not int 10
+
+
 def test_tilde_paths_are_expanded_to_absolute_paths(temp_config_file: Path):
     """Leading-tilde path values should be expanded to absolute paths."""
     write_config(
