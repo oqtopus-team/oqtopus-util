@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from oqtopus_util.config import load_config
+from oqtopus_util.config import load_config, mask_sensitive_info, setup_logging
 
 # ---------------------------------------------------------------------------
 # Helper
@@ -210,6 +210,101 @@ def test_config_with_env_variations(temp_config_file: Path):
     assert cfg["default_whitespace"] is None
 
 
+def test_unquoted_default_is_unchanged(temp_config_file: Path):
+    """
+    Unquoted defaults still behave as before (backward compatibility).
+    """
+    write_config(
+        temp_config_file,
+        """
+        timeout: ${TIMEOUT, 30}
+        debug: ${DEBUG, false}
+        label: ${LABEL, hello}
+        """,
+    )
+    os.environ.pop("TIMEOUT", None)
+    os.environ.pop("DEBUG", None)
+    os.environ.pop("LABEL", None)
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["timeout"] == 30  # YAML int
+    assert cfg["debug"] is False  # YAML bool
+    assert cfg["label"] == "hello"  # YAML string
+
+
+def test_double_quoted_default_with_brace_inside(temp_config_file: Path):
+    """
+    Double-quoted default containing } is expanded correctly.
+    """
+    write_config(
+        temp_config_file,
+        """
+        path: ${MY_PATH, "/base/{key}/sub"}
+        """,
+    )
+    os.environ.pop("MY_PATH", None)
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["path"] == "/base/{key}/sub"
+
+
+def test_single_quoted_default_with_brace_inside(temp_config_file: Path):
+    """
+    Single-quoted default containing } is expanded correctly.
+    """
+    write_config(
+        temp_config_file,
+        """
+        path: ${MY_PATH, '/base/{key}/sub'}
+        """,
+    )
+    os.environ.pop("MY_PATH", None)
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["path"] == "/base/{key}/sub"
+
+
+def test_env_overrides_quoted_default(temp_config_file: Path):
+    """
+    When the environment variable is set, the quoted default is ignored.
+    """
+    write_config(
+        temp_config_file,
+        """
+        path: ${MY_PATH, "/base/{key}/sub"}
+        """,
+    )
+    os.environ["MY_PATH"] = "/real/path"
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["path"] == "/real/path"
+
+
+def test_quoted_default_preserves_string_type(temp_config_file: Path):
+    """
+    Quoted defaults are passed to YAML with quotes intact, so YAML treats them
+    as strings even when the content looks like an int or bool.
+    """
+    write_config(
+        temp_config_file,
+        """
+        flag: ${FLAG, "true"}
+        count: ${COUNT, '10'}
+        """,
+    )
+    os.environ.pop("FLAG", None)
+    os.environ.pop("COUNT", None)
+
+    cfg = load_config(str(temp_config_file))
+
+    assert cfg["flag"] == "true"  # str, not bool True
+    assert cfg["count"] == "10"  # str, not int 10
+
+
 def test_tilde_paths_are_expanded_to_absolute_paths(temp_config_file: Path):
     """Leading-tilde path values should be expanded to absolute paths."""
     write_config(
@@ -232,3 +327,61 @@ def test_tilde_paths_are_expanded_to_absolute_paths(temp_config_file: Path):
     assert cfg["nested"][0] == str(home / ".config" / "oqtopus")
     assert cfg["nested"][1] == "/tmp/fixed"  # noqa: S108
     assert cfg["label"] == "release~candidate"
+
+
+# ---------------------------------------------------------------------------
+# mask_sensitive_info
+# ---------------------------------------------------------------------------
+
+
+def test_mask_sensitive_info_masks_all_sensitive_keys():
+    """All four built-in sensitive keys should be replaced with ***MASKED***."""
+    config = {
+        "api_key": "key123",
+        "api_token": "tok456",
+        "password": "hunter2",
+        "secret_key": "s3cr3t",
+    }
+    result = mask_sensitive_info(config)
+    assert all(v == "***MASKED***" for v in result.values())
+
+
+def test_mask_sensitive_info_passes_through_non_sensitive():
+    """Non-sensitive keys should be returned unchanged."""
+    config = {"host": "localhost", "port": 5432, "debug": True}
+    result = mask_sensitive_info(config)
+    assert result == config
+
+
+def test_mask_sensitive_info_recurses_into_nested_dict():
+    """Nested dicts should be processed recursively."""
+    config = {
+        "database": {
+            "host": "db.example.com",
+            "password": "secret",
+        },
+        "api_key": "toplevel",
+    }
+    result = mask_sensitive_info(config)
+    assert result["database"]["host"] == "db.example.com"
+    assert result["database"]["password"] == "***MASKED***"  # noqa: S105
+    assert result["api_key"] == "***MASKED***"
+
+
+# ---------------------------------------------------------------------------
+# setup_logging
+# ---------------------------------------------------------------------------
+
+
+def test_setup_logging_applies_valid_config():
+    """A minimal valid logging config dict should be applied without error."""
+    cfg = {"version": 1, "disable_existing_loggers": False}
+    setup_logging(cfg)  # should not raise
+
+
+def test_setup_logging_raises_type_error_for_non_dict():
+    """Passing a non-dict should raise TypeError with a descriptive message."""
+    with pytest.raises(
+        TypeError, match="Logging configuration must be convertible to a dict"
+    ):
+        setup_logging("not-a-dict")

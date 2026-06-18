@@ -25,6 +25,13 @@ is replaced at the string level, allowing YAML to apply its own type-casting rul
 | `${VAR}` | No | `null` (YAML `None`) |
 | `${VAR, default}` | Yes | Raw value of `VAR` |
 | `${VAR, default}` | No | `default` — YAML type-casts it (e.g. `10` → `int`, `false` → `bool`) |
+| `${VAR, "default"}` | Yes | Raw value of `VAR` |
+| `${VAR, "default"}` | No | `"default"` — YAML treats it as a string (quotes suppress type-casting) |
+| `${VAR, 'default'}` | Yes | Raw value of `VAR` |
+| `${VAR, 'default'}` | No | `'default'` — same as double-quoted form |
+
+Quoting the default value allows `}` to appear inside it. Without quotes, `}` would be
+interpreted as the closing delimiter of the `${...}` expression.
 
 String values that start with `~` are expanded to absolute home-directory paths
 (equivalent to `Path(value).expanduser()`).
@@ -37,6 +44,7 @@ server:
   port: ${PORT, 8080}
   debug: ${DEBUG, false}
   data_dir: ~/oqtopus/data
+  template: ${TEMPLATE, "/base/{key}/sub"}
 ```
 
 ```python
@@ -46,10 +54,11 @@ from oqtopus_util.config import load_config
 os.environ["HOST"] = "example.com"
 
 cfg = load_config("config/config.yaml")
-# cfg["server"]["host"]     == "example.com"
-# cfg["server"]["port"]     == 8080          (int, cast by YAML)
-# cfg["server"]["debug"]    is False         (bool, cast by YAML)
-# cfg["server"]["data_dir"] == "/home/user/oqtopus/data"
+# cfg["server"]["host"]       == "example.com"
+# cfg["server"]["port"]       == 8080          (int, cast by YAML)
+# cfg["server"]["debug"]      is False         (bool, cast by YAML)
+# cfg["server"]["data_dir"]   == "/home/user/oqtopus/data"
+# cfg["server"]["template"]   == "/base/{key}/sub"        (str, quotes suppress casting)
 ```
 
 ### mask_sensitive_info
@@ -71,7 +80,7 @@ the values of the following keys are replaced with `"***MASKED***"`:
 The function processes nested dictionaries recursively, so sensitive values at any depth
 are masked.
 
-#### Example
+#### Example: mask_sensitive_info
 
 ```python
 from oqtopus_util.config import mask_sensitive_info
@@ -104,7 +113,7 @@ setup_logging(logging_cfg)
 The `logging_cfg` argument must be a Python `dict`.
 A `TypeError` is raised if a non-dict value is passed.
 
-#### Example
+#### Example: setup_logging
 
 ```python
 from oqtopus_util.config import load_config, setup_logging
