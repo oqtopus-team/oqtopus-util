@@ -6,10 +6,6 @@ resolution-markers = [
     "python_full_version < '3.15'",
 ]
 
-[options]
-exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
-exclude-newer-span = "P1W"
-
 [[package]]
 name = "application-file-scanner"
 version = "0.6.4"
@@ -829,7 +825,7 @@ wheels = [
 
 [[package]]
 name = "oqtopus-util"
-version = "1.0.1"
+version = "1.0.2"
 source = { editable = "." }
 dependencies = [
     { name = "pyyaml" },
