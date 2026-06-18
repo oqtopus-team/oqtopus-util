@@ -240,14 +240,14 @@ def test_double_quoted_default_with_brace_inside(temp_config_file: Path):
     write_config(
         temp_config_file,
         """
-        config_dir: ${CONFIG_DIR, "/app/config/{chip_id}/config"}
+        path: ${MY_PATH, "/base/{key}/sub"}
         """,
     )
-    os.environ.pop("CONFIG_DIR", None)
+    os.environ.pop("MY_PATH", None)
 
     cfg = load_config(str(temp_config_file))
 
-    assert cfg["config_dir"] == "/app/config/{chip_id}/config"
+    assert cfg["path"] == "/base/{key}/sub"
 
 
 def test_single_quoted_default_with_brace_inside(temp_config_file: Path):
@@ -257,14 +257,14 @@ def test_single_quoted_default_with_brace_inside(temp_config_file: Path):
     write_config(
         temp_config_file,
         """
-        config_dir: ${CONFIG_DIR, '/app/config/{chip_id}/config'}
+        path: ${MY_PATH, '/base/{key}/sub'}
         """,
     )
-    os.environ.pop("CONFIG_DIR", None)
+    os.environ.pop("MY_PATH", None)
 
     cfg = load_config(str(temp_config_file))
 
-    assert cfg["config_dir"] == "/app/config/{chip_id}/config"
+    assert cfg["path"] == "/base/{key}/sub"
 
 
 def test_env_overrides_quoted_default(temp_config_file: Path):
@@ -274,14 +274,14 @@ def test_env_overrides_quoted_default(temp_config_file: Path):
     write_config(
         temp_config_file,
         """
-        config_dir: ${CONFIG_DIR, "/app/config/{chip_id}/config"}
+        path: ${MY_PATH, "/base/{key}/sub"}
         """,
     )
-    os.environ["CONFIG_DIR"] = "/real/path"
+    os.environ["MY_PATH"] = "/real/path"
 
     cfg = load_config(str(temp_config_file))
 
-    assert cfg["config_dir"] == "/real/path"
+    assert cfg["path"] == "/real/path"
 
 
 def test_quoted_default_preserves_string_type(temp_config_file: Path):
