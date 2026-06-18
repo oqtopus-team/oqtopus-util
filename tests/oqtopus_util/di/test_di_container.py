@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from oqtopus_util.di import DiContainer
+from oqtopus_util.di import CircularDependencyError, DiContainer
 
 
 # ----------------------------------------------------------------------
@@ -177,3 +177,214 @@ def test_underbar_keys_are_excluded_from_kwargs():
     assert isinstance(obj, DummyA)
     assert obj.x == 42
     assert obj.label == "ok"
+
+
+# ----------------------------------------------------------------------
+# @-reference resolution
+# ----------------------------------------------------------------------
+@dataclass
+class DummyC:
+    """Holds a reference to another dependency."""
+
+    dep: object
+    name: str
+
+
+DUMMYC_PATH = f"{__name__}.DummyC"
+
+
+def test_at_reference_resolves_dependency():
+    """String values starting with '@' must be resolved as dependencies."""
+    config = {
+        "inner": {
+            "_target_": DUMMYB_PATH,
+            "value": 7,
+        },
+        "outer": {
+            "_target_": DUMMYC_PATH,
+            "dep": "@inner",
+            "name": "wrap",
+        },
+    }
+    dicon = DiContainer(config)
+    outer = dicon.get("outer")
+
+    assert isinstance(outer.dep, DummyB)
+    assert outer.dep.value == 7
+    assert outer.name == "wrap"
+
+
+def test_at_reference_singleton_is_shared():
+    """Two components that reference the same singleton get the same instance."""
+    config = {
+        "shared": {
+            "_target_": DUMMYB_PATH,
+            "value": 99,
+        },
+        "first": {
+            "_target_": DUMMYC_PATH,
+            "dep": "@shared",
+            "name": "first",
+        },
+        "second": {
+            "_target_": DUMMYC_PATH,
+            "dep": "@shared",
+            "name": "second",
+        },
+    }
+    dicon = DiContainer(config)
+    first = dicon.get("first")
+    second = dicon.get("second")
+
+    assert first.dep is second.dep
+
+
+def test_at_reference_with_whitespace_stripped():
+    """'@ inner' (with trailing space after @) should resolve 'inner'."""
+    config = {
+        "inner": {
+            "_target_": DUMMYB_PATH,
+            "value": 3,
+        },
+        "outer": {
+            "_target_": DUMMYC_PATH,
+            "dep": "@ inner",
+            "name": "ws",
+        },
+    }
+    dicon = DiContainer(config)
+    outer = dicon.get("outer")
+
+    assert isinstance(outer.dep, DummyB)
+
+
+def test_invalid_at_reference_raises_value_error():
+    """'@' alone (no dependency name) must raise ValueError."""
+    config = {
+        "obj": {
+            "_target_": DUMMYC_PATH,
+            "dep": "@",
+            "name": "bad",
+        },
+    }
+    dicon = DiContainer(config)
+    with pytest.raises(ValueError, match="Invalid dependency reference"):
+        dicon.get("obj")
+
+
+# ----------------------------------------------------------------------
+# Circular dependency detection
+# ----------------------------------------------------------------------
+def test_circular_dependency_raises_error():
+    """A → B → A cycle must raise CircularDependencyError."""
+    config = {
+        "a": {
+            "_target_": DUMMYC_PATH,
+            "dep": "@b",
+            "name": "a",
+        },
+        "b": {
+            "_target_": DUMMYC_PATH,
+            "dep": "@a",
+            "name": "b",
+        },
+    }
+    dicon = DiContainer(config)
+    with pytest.raises(CircularDependencyError, match="Circular dependency"):
+        dicon.get("a")
+
+
+def test_self_referential_dependency_raises_error():
+    """A component that references itself must raise CircularDependencyError."""
+    config = {
+        "self_ref": {
+            "_target_": DUMMYC_PATH,
+            "dep": "@self_ref",
+            "name": "loop",
+        },
+    }
+    dicon = DiContainer(config)
+    with pytest.raises(CircularDependencyError):
+        dicon.get("self_ref")
+
+
+# ----------------------------------------------------------------------
+# _resolve_value: dict and list recursion
+# ----------------------------------------------------------------------
+@dataclass
+class DummyDict:
+    mapping: dict
+
+
+@dataclass
+class DummyList:
+    items: list
+
+
+DUMMYDICT_PATH = f"{__name__}.DummyDict"
+DUMMYLIST_PATH = f"{__name__}.DummyList"
+
+
+def test_resolve_value_dict_recursive():
+    """Dict values containing @-refs must be resolved recursively."""
+    config = {
+        "inner": {
+            "_target_": DUMMYB_PATH,
+            "value": 55,
+        },
+        "outer": {
+            "_target_": DUMMYDICT_PATH,
+            "mapping": {"key": "@inner"},
+        },
+    }
+    dicon = DiContainer(config)
+    outer = dicon.get("outer")
+
+    assert isinstance(outer.mapping["key"], DummyB)
+    assert outer.mapping["key"].value == 55
+
+
+def test_resolve_value_list_recursive():
+    """List values containing @-refs must be resolved recursively."""
+    config = {
+        "inner": {
+            "_target_": DUMMYB_PATH,
+            "value": 11,
+        },
+        "outer": {
+            "_target_": DUMMYLIST_PATH,
+            "items": ["@inner", 42],
+        },
+    }
+    dicon = DiContainer(config)
+    outer = dicon.get("outer")
+
+    assert isinstance(outer.items[0], DummyB)
+    assert outer.items[1] == 42
+
+
+# ----------------------------------------------------------------------
+# _load_class error paths
+# ----------------------------------------------------------------------
+def test_load_class_no_dot_raises_import_error():
+    """_target_ with no dot should raise ImportError."""
+    config = {
+        "obj": {
+            "_target_": "NoDotPath",
+        },
+    }
+    dicon = DiContainer(config)
+    with pytest.raises(ImportError, match="Invalid _target_ format"):
+        dicon.get("obj")
+
+
+def test_load_class_missing_class_in_module_raises_import_error():
+    """_target_ pointing to a missing class in a real module raises ImportError."""
+    config = {
+        "obj": {
+            "_target_": "collections.NoSuchClass",
+        },
+    }
+    dicon = DiContainer(config)
+    with pytest.raises(ImportError, match="has no class"):
+        dicon.get("obj")
