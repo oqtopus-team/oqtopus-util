@@ -70,15 +70,24 @@ safe_cfg = mask_sensitive_info(config)
 ```
 
 `mask_sensitive_info(config)` returns a copy of the configuration dictionary where
-the values of the following keys are replaced with `"***MASKED***"`:
+sensitive values are replaced with `"***MASKED***"`.
 
-- `api_key`
-- `api_token`
-- `password`
-- `secret_key`
+A key is treated as sensitive when its name (case-insensitive) contains any of the
+following substrings:
+
+| Substring | Example keys that match |
+| --- | --- |
+| `key` | `api_key`, `openai_api_key` |
+| `password` | `password`, `db_password` |
+| `secret` | `secret`, `client_secret` |
+| `token` | `token`, `access_token` |
 
 The function processes nested dictionaries recursively, so sensitive values at any depth
 are masked.
+
+!!! note
+    This function is designed for small configuration dicts loaded at startup and is not
+    intended for large data sets.
 
 #### Example: mask_sensitive_info
 
@@ -88,15 +97,17 @@ from oqtopus_util.config import mask_sensitive_info
 config = {
     "database": {
         "host": "localhost",
-        "password": "s3cr3t",
+        "db_password": "s3cr3t",
     },
-    "api_token": "abc123",
+    "openai_api_key": "abc123",
+    "access_token": "tok456",
 }
 
 safe = mask_sensitive_info(config)
-# safe["database"]["password"] == "***MASKED***"
-# safe["api_token"]            == "***MASKED***"
-# safe["database"]["host"]     == "localhost"
+# safe["database"]["db_password"] == "***MASKED***"
+# safe["openai_api_key"]          == "***MASKED***"
+# safe["access_token"]            == "***MASKED***"
+# safe["database"]["host"]        == "localhost"
 ```
 
 ### setup_logging
