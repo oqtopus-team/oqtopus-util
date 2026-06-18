@@ -6,7 +6,7 @@ from typing import Any
 
 import yaml
 
-SENSITIVE_KEYS = {"api_key", "api_token", "password", "secret_key"}
+SENSITIVE_PATTERNS = {"key", "password", "secret", "token"}
 
 # Pattern matching ${VAR}, ${VAR, default}, ${VAR, "default"}, ${VAR, 'default'}
 # Group 1: variable name
@@ -16,17 +16,23 @@ _PATTERN = re.compile(r"""\$\{([A-Z0-9_]+)(?:,\s*(?:("[^"]*"|'[^']*')|([^}]+?)))
 
 
 def mask_sensitive_info(config: dict[str, Any]) -> dict[str, Any]:
-    """Mask sensitive information in the given DictConfig.
+    """Mask sensitive information in the given config dict.
 
-    This function replaces the values of predefined sensitive keys
-    (e.g., "api_key", "api_token", "password", "secret_key") with a masked string.
-    It processes nested DictConfig recursively.
+    A key is considered sensitive if its name (case-insensitive) contains any of
+    the substrings in ``SENSITIVE_PATTERNS``: ``key``, ``password``, ``secret``,
+    or ``token``.  For example, ``api_key``, ``db_password``, ``access_token``,
+    and ``client_secret`` are all masked.
+
+    This function is designed for small configuration dicts loaded at startup and
+    is not intended for large data sets.
+
+    It processes nested dicts recursively.
 
     Args:
-        config: DictConfig to mask.
+        config: Configuration dict to mask.
 
     Returns:
-        A new dictionary with sensitive values masked.
+        A new dictionary with sensitive values replaced by ``"***MASKED***"``.
 
     """
     masked: dict[str, Any] = {}
@@ -34,7 +40,7 @@ def mask_sensitive_info(config: dict[str, Any]) -> dict[str, Any]:
         if isinstance(value, dict):
             # Recursively mask nested dictionaries
             masked[key] = mask_sensitive_info(value)
-        elif key in SENSITIVE_KEYS:
+        elif any(pat in key.lower() for pat in SENSITIVE_PATTERNS):
             masked[key] = "***MASKED***"
         else:
             masked[key] = value

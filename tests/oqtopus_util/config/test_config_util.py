@@ -334,13 +334,28 @@ def test_tilde_paths_are_expanded_to_absolute_paths(temp_config_file: Path):
 # ---------------------------------------------------------------------------
 
 
-def test_mask_sensitive_info_masks_all_sensitive_keys():
-    """All four built-in sensitive keys should be replaced with ***MASKED***."""
+def test_mask_sensitive_info_masks_keys_containing_sensitive_patterns():
+    """Keys whose names contain 'key', 'password', 'secret', or 'token' are masked."""
     config = {
-        "api_key": "key123",
-        "api_token": "tok456",
-        "password": "hunter2",
-        "secret_key": "s3cr3t",
+        "api_key": "k1",
+        "openai_api_key": "k2",
+        "password": "p1",
+        "db_password": "p2",
+        "secret": "s1",
+        "client_secret": "s2",
+        "token": "t1",
+        "access_token": "t2",
+    }
+    result = mask_sensitive_info(config)
+    assert all(v == "***MASKED***" for v in result.values())
+
+
+def test_mask_sensitive_info_is_case_insensitive():
+    """Key matching should be case-insensitive (e.g. API_KEY, Password)."""
+    config = {
+        "API_KEY": "k1",
+        "Password": "p1",
+        "SECRET_TOKEN": "s1",
     }
     result = mask_sensitive_info(config)
     assert all(v == "***MASKED***" for v in result.values())
@@ -358,14 +373,14 @@ def test_mask_sensitive_info_recurses_into_nested_dict():
     config = {
         "database": {
             "host": "db.example.com",
-            "password": "secret",
+            "db_password": "secret",
         },
-        "api_key": "toplevel",
+        "openai_api_key": "toplevel",
     }
     result = mask_sensitive_info(config)
     assert result["database"]["host"] == "db.example.com"
-    assert result["database"]["password"] == "***MASKED***"  # noqa: S105
-    assert result["api_key"] == "***MASKED***"
+    assert result["database"]["db_password"] == "***MASKED***"  # noqa: S105
+    assert result["openai_api_key"] == "***MASKED***"
 
 
 # ---------------------------------------------------------------------------
